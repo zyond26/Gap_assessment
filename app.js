@@ -700,6 +700,9 @@ function initTabs() {
             } else if (targetTab === 'tab-policies') {
                 title = 'Thư Viện Chính Sách Bảo Mật';
                 subtitle = 'Hệ thống quy trình và tài liệu quy chuẩn an toàn thông tin của DieuPay';
+            } else if (targetTab === 'tab-report') {
+                title = 'Báo Cáo Đánh Giá Khoảng Cách PCI DSS';
+                subtitle = 'Báo cáo chi tiết hiện trạng, rủi ro và lộ trình tuân thủ PCI DSS v4.0.1 của DieuPay';
             }
 
             document.getElementById('page-title-text').innerText = title;
@@ -1450,8 +1453,8 @@ function init() {
     updateSecurityWarningsPanel();
 
     // New tab features init
-    renderSaqQuestions();
     initPolicyLibrary();
+    initReportLibrary();
     initSaqSelector();
     initSocMonitor();
     updateNetworkThreatStatus();
@@ -1597,20 +1600,7 @@ const POLICIES = [
     }
 ];
 
-const SAQ_QUESTIONS = [
-    { id: 1, reqId: 1, title: "SAQ 1.1: Tường lửa phân tách", text: "Tường lửa Next-Generation Firewall có được cấu hình chặn tất cả truy cập mặc định và rà soát luật định kỳ tối thiểu 6 tháng/lần không?" },
-    { id: 2, reqId: 2, title: "SAQ 2.2: Quy chuẩn cấu hình an toàn", text: "Có tài liệu tiêu chuẩn cấu hình hệ thống (Hardening Standards) và thay đổi toàn bộ thông tin đăng nhập mặc định của thiết bị switch/router nội bộ không?" },
-    { id: 3, reqId: 3, title: "SAQ 3.4: Bảo vệ dữ liệu chủ thẻ lưu trữ", text: "Dữ liệu số thẻ (PAN) lưu trữ tĩnh có được mã hóa bằng thuật toán AES-256, cất khóa an toàn trong thiết bị HSM, và logs hệ thống có bộ lọc mask số thẻ không?" },
-    { id: 4, reqId: 4, title: "SAQ 4.1: Mã hóa dữ liệu truyền tải", text: "Mọi luồng truyền tải dữ liệu thẻ trên mạng công cộng có bắt buộc sử dụng giao thức TLS 1.2/1.3 mạnh và loại bỏ hoàn toàn các giao thức lỗi thời (TLS 1.0/1.1) không?" },
-    { id: 5, reqId: 5, title: "SAQ 5.2: Bảo vệ khỏi mã độc", text: "Hệ thống máy chủ và máy trạm văn phòng có được cài đặt phần mềm diệt virus/EDR bảo vệ và được cấu hình cập nhật tự động định kỳ không?" },
-    { id: 6, reqId: 6, title: "SAQ 6.3: Phát triển phần mềm an toàn", text: "Có quy trình vá lỗ hổng thư viện nguồn mở nguy hiểm (ví dụ: Log4Shell) và tích hợp công cụ quét mã nguồn tĩnh SAST trong CI/CD pipeline trước khi triển khai không?" },
-    { id: 7, reqId: 7, title: "SAQ 7.1: Hạn chế đặc quyền", text: "Tài khoản DB của ứng dụng có được phân quyền tối thiểu (không dùng SUPERUSER) và nhân viên hỗ trợ CS Portal có bị che số thẻ PAN bằng mặt nạ không?" },
-    { id: 8, reqId: 8, title: "SAQ 8.3: Xác thực đa yếu tố (MFA)", text: "Kết nối quản trị VPN và Bastion Host từ xa vào mạng CDE có bắt buộc xác thực đa yếu tố (MFA OTP) và áp dụng chính sách mật khẩu Active Directory mạnh không?" },
-    { id: 9, reqId: 9, title: "SAQ 9.1: An ninh vật lý phòng máy", text: "Thiết bị phần cứng lưu trữ dữ liệu thẻ CDE tại Viettel IDC có được kiểm soát tiếp cận vật lý nghiêm ngặt bằng thẻ từ, vân tay và camera giám sát không?" },
-    { id: 10, reqId: 10, title: "SAQ 10.2: Giám sát nhật ký (SIEM)", text: "Nhật ký hệ thống CDE có được tập trung hóa về Wazuh SIEM, lưu trữ tối thiểu 3 tháng nóng và 1 năm lạnh phục vụ điều tra sự cố không?" },
-    { id: 11, reqId: 11, title: "SAQ 11.3: Quét lỗ hổng định kỳ", text: "Hệ thống DieuPay có thực hiện quét lỗ hổng bảo mật định kỳ 3 tháng/lần bởi đối tác quét lỗ hổng ASV và thực hiện kiểm thử xâm nhập thường niên không?" },
-    { id: 12, reqId: 12, title: "SAQ 12.1: Chính sách & Ứng phó sự cố", text: "Công ty có ban hành chính sách an toàn thông tin toàn diện, rà soát hàng năm và thiết lập quy trình ứng phó sự cố bảo mật (Incident Response) chi tiết không?" }
-];
+// SAQ_QUESTIONS removed
 
 const POTENTIAL_ALERTS_DANGER = [
     { rule: "100201", level: 12, desc: "Phát hiện payload SQL Injection 'UNION SELECT' trên API Gateway", host: "10.0.1.15 (API Gateway)", status: "Alerted" },
@@ -1720,26 +1710,7 @@ function updateNetworkThreatStatus() {
 
 // --- SAQ-D QUESTIONNAIRE HANDLERS ---
 function updateSaqProgress(percent, compliantCount, total) {
-    const progressBar = document.getElementById('saq-progress-bar');
-    const scoreVal = document.getElementById('saq-progress-score');
     const aocContainer = document.getElementById('saq-aoc-container');
-
-    if (progressBar) {
-        progressBar.style.width = `${percent}%`;
-        progressBar.innerText = `${percent}%`;
-
-        if (percent < 50) {
-            progressBar.style.background = '#ef4444';
-        } else if (percent < 90) {
-            progressBar.style.background = '#f59e0b';
-        } else {
-            progressBar.style.background = '#10b981';
-        }
-    }
-
-    if (scoreVal) {
-        scoreVal.innerText = `${compliantCount} / ${total} Đạt`;
-    }
 
     if (aocContainer) {
         if (percent === 100) {
@@ -1793,90 +1764,13 @@ function updateSaqProgress(percent, compliantCount, total) {
                     <div style="font-size: 28px; color: var(--color-danger); filter: drop-shadow(0 0 5px rgba(239,68,68,0.3));"><i class="fa-solid fa-stamp"></i></div>
                     <div>
                         <h5 style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Attestation of Compliance (AoC) chưa được mở khóa</h5>
-                        <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">Hệ thống DieuPay hiện chưa đáp ứng 100% tuân thủ tiêu chuẩn PCI DSS. Hãy khắc phục tất cả khoảng cách bảo mật (Gaps) hoặc trả lời đạt toàn bộ câu hỏi khảo sát SAQ ở bên dưới để mở khóa bản chứng nhận tuân thủ chính thức của chuyên gia.</p>
+                        <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">Hệ thống DieuPay hiện chưa đáp ứng 100% tuân thủ tiêu chuẩn PCI DSS. Hãy khắc phục tất cả khoảng cách bảo mật (Gaps) tại Bảng điều khiển chính hoặc chuyển đổi Chế độ mô phỏng sang "Đã tuân thủ" để mở khóa bản chứng nhận tuân thủ chính thức từ chuyên gia QSA.</p>
                     </div>
                 </div>
             `;
         }
     }
 }
-
-function renderSaqQuestions() {
-    const container = document.getElementById('saq-questions-container');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    SAQ_QUESTIONS.forEach(q => {
-        const req = state.requirements.find(r => r.id === q.reqId);
-        const isCompliant = req ? req.compliant : false;
-
-        const card = document.createElement('div');
-        card.className = 'saq-question-card';
-        card.innerHTML = `
-            <div class="saq-question-header">
-                <span class="saq-question-title">${q.title}</span>
-                <span class="saq-question-req">PCI Yêu Cầu ${q.reqId}</span>
-            </div>
-            <div class="saq-question-text">${q.text}</div>
-            <div class="saq-action-area">
-                <div class="saq-radio-group">
-                    <label class="saq-radio-label ${isCompliant ? 'selected-yes' : ''}">
-                        <input type="radio" name="saq-radio-${q.id}" value="yes" ${isCompliant ? 'checked' : ''} onclick="setSaqQuestionState(${q.reqId}, true)">
-                        <span>Có (Yes)</span>
-                    </label>
-                    <label class="saq-radio-label ${!isCompliant ? 'selected-no' : ''}">
-                        <input type="radio" name="saq-radio-${q.id}" value="no" ${!isCompliant ? 'checked' : ''} onclick="setSaqQuestionState(${q.reqId}, false)">
-                        <span>Không (No)</span>
-                    </label>
-                </div>
-                <div class="saq-status">
-                    <span class="saq-status-indicator ${isCompliant ? 'compliant' : 'non-compliant'}">
-                        ${isCompliant ? 'Tuân thủ' : 'Thiếu sót (Gap)'}
-                    </span>
-                </div>
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
-
-window.setSaqQuestionState = function (reqId, compliant) {
-    const reqIndex = state.requirements.findIndex(r => r.id === reqId);
-    if (reqIndex === -1) return;
-
-    state.requirements[reqIndex].compliant = compliant;
-
-    const totalCompliant = state.requirements.filter(r => r.compliant).length;
-    const isAllCompliant = totalCompliant === state.requirements.length;
-
-    if (isAllCompliant) {
-        state.simulationMode = 'compliant';
-        dom.btnModeCompliant.classList.add('active');
-        dom.btnModeNoncompliant.classList.remove('active');
-        document.querySelectorAll('.critical-node').forEach(node => node.classList.add('secured'));
-    } else {
-        state.simulationMode = 'noncompliant';
-        dom.btnModeNoncompliant.classList.add('active');
-        dom.btnModeCompliant.classList.remove('active');
-        document.querySelectorAll('.critical-node').forEach(node => node.classList.remove('secured'));
-    }
-
-    calculateCompliance();
-    renderRequirements();
-    updateSecurityWarningsPanel();
-    updateNetworkThreatStatus();
-    renderSaqQuestions();
-
-    const activeNodeElement = document.querySelector('.net-node.selected-node');
-    if (activeNodeElement) {
-        showNodeDetails(activeNodeElement.getAttribute('data-node'));
-    }
-
-    if (document.getElementById('scan-report-container').querySelector('.scan-report-header')) {
-        renderScanReport();
-    }
-};
 
 // --- SECURITY POLICIES LIBRARY HANDLERS ---
 function initPolicyLibrary() {
@@ -2067,49 +1961,154 @@ const wizardHistory = [];
 const WIZARD_QUESTIONS = [
     {
         id: "q1",
-        text: "Bước 1: Doanh nghiệp của bạn đóng vai trò gì trong chuỗi thanh toán thẻ?",
+        step: 1,
+        text: "Doanh nghiệp của bạn đóng vai trò gì trong chuỗi thanh toán thẻ?",
         options: [
-            { text: "Thương nhân bán hàng (Merchant - Bán sản phẩm/dịch vụ trực tiếp tới khách hàng)", next: "q2", action: () => { wizardAnswers.isServiceProvider = false; } },
-            { text: "Nhà cung cấp dịch vụ (Service Provider - Cung cấp cổng thanh toán, ví điện tử, hosting, bảo mật cho doanh nghiệp khác)", next: "result", recommend: "saq-d-service", action: () => { wizardAnswers.isServiceProvider = true; } }
+            {
+                title: "Thương nhân bán hàng (Merchant)",
+                desc: "Doanh nghiệp bán sản phẩm, dịch vụ và chấp nhận thanh toán thẻ trực tiếp từ khách hàng.",
+                icon: "fa-solid fa-store",
+                next: "q2",
+                action: () => { wizardAnswers.isServiceProvider = false; }
+            },
+            {
+                title: "Nhà cung cấp dịch vụ (Service Provider)",
+                desc: "Đơn vị cung cấp cổng thanh toán, ví điện tử, hosting, bảo mật hoặc xử lý giao dịch cho các doanh nghiệp khác.",
+                icon: "fa-solid fa-server",
+                next: "result",
+                recommend: "saq-d-service",
+                action: () => { wizardAnswers.isServiceProvider = true; }
+            }
         ]
     },
     {
         id: "q2",
-        text: "Bước 2: Hệ thống của bạn có lưu trữ dữ liệu thẻ (PAN, CVV, ngày hết hạn) dưới dạng điện tử tĩnh không?",
+        step: 2,
+        text: "Hệ thống của bạn có lưu trữ dữ liệu thẻ (PAN, CVV, ngày hết hạn) dưới dạng điện tử tĩnh không?",
         options: [
-            { text: "Có lưu trữ (Lưu số thẻ trong Cơ sở dữ liệu Postgres, ổ đĩa sao lưu, hoặc log file)", next: "result", recommend: "saq-d-merchant", action: () => { wizardAnswers.storesData = true; } },
-            { text: "Không lưu trữ (Hoàn toàn không ghi nhận dữ liệu thẻ thô tĩnh trên bất kỳ bộ nhớ nào)", next: "q3", action: () => { wizardAnswers.storesData = false; } }
+            {
+                title: "Có lưu trữ dữ liệu thẻ",
+                desc: "Lưu số thẻ tín dụng thô (PAN, CVV) trong Cơ sở dữ liệu Postgres, các tệp log thô, hoặc ổ đĩa sao lưu.",
+                icon: "fa-solid fa-database text-danger",
+                next: "result",
+                recommend: "saq-d-merchant",
+                action: () => { wizardAnswers.storesData = true; }
+            },
+            {
+                title: "Không lưu trữ dữ liệu thẻ",
+                desc: "Mọi thông tin thẻ thô được chuyển thành Token bảo mật hoặc outsource hoàn toàn, không lưu trữ dữ liệu thẻ thô tĩnh.",
+                icon: "fa-solid fa-shield-halved text-success",
+                next: "q3",
+                action: () => { wizardAnswers.storesData = false; }
+            }
         ]
     },
     {
         id: "q3",
-        text: "Bước 3: Doanh nghiệp của bạn nhận dữ liệu thẻ qua kênh giao dịch nào?",
+        step: 3,
+        text: "Doanh nghiệp của bạn tiếp nhận dữ liệu thẻ qua kênh giao dịch nào?",
         options: [
-            { text: "Thương mại điện tử trực tuyến (E-commerce qua Website hoặc Mobile App)", next: "q4_ecom", action: () => { wizardAnswers.channel = "ecommerce"; } },
-            { text: "Cửa hàng vật lý (Thanh toán tại quầy) hoặc Qua điện thoại/Thư giấy (MOTO)", next: "q4_retail", action: () => { wizardAnswers.channel = "retail"; } }
+            {
+                title: "Thương mại điện tử (E-commerce)",
+                desc: "Giao dịch trực tuyến qua trang web thương mại điện tử hoặc ứng dụng di động (Card-not-present).",
+                icon: "fa-solid fa-globe",
+                next: "q4_ecom",
+                action: () => { wizardAnswers.channel = "ecommerce"; }
+            },
+            {
+                title: "Điểm bán lẻ vật lý (POS/MOTO)",
+                desc: "Thanh toán trực tiếp tại cửa hàng qua thiết bị POS hoặc nhận thông tin thẻ qua điện thoại/thư giấy.",
+                icon: "fa-solid fa-credit-card",
+                next: "q4_retail",
+                action: () => { wizardAnswers.channel = "retail"; }
+            }
         ]
     },
     {
         id: "q4_ecom",
-        text: "Bước 4 (E-commerce): Trang web/App của bạn tích hợp thanh toán như thế nào?",
+        step: 4,
+        text: "Website/App thương mại điện tử của bạn tích hợp thanh toán như thế nào?",
         options: [
-            { text: "Chuyển hướng (Redirect) hoàn toàn hoặc dùng iFrame / Hosted Fields (Dữ liệu thẻ nhập trên form bảo mật của Cổng thanh toán, server của bạn không chạm dữ liệu)", next: "result", recommend: "saq-a" },
-            { text: "Direct Post hoặc API (Website của bạn hiển thị form nhập thẻ, trình duyệt khách hàng gửi trực tiếp tới cổng thanh toán nhưng code web của bạn có chạm vào form)", next: "result", recommend: "saq-a-ep" },
-            { text: "API gọi từ Server-to-Server (Dữ liệu thẻ gửi về server của bạn trước khi chuyển tiếp sang cổng thanh toán)", next: "result", recommend: "saq-d-merchant" }
+            {
+                title: "Chuyển hướng (Redirect) / iFrame bảo mật",
+                desc: "Khách hàng được chuyển hướng sang cổng thanh toán hoặc nhập thẻ trong iFrame/Hosted Fields bảo mật. Server của bạn hoàn toàn không tiếp nhận dữ liệu thẻ.",
+                icon: "fa-solid fa-external-link-alt",
+                next: "result",
+                recommend: "saq-a"
+            },
+            {
+                title: "Form nhập liệu tại Web (Direct Post / API)",
+                desc: "Khách hàng nhập thẻ trực tiếp trên form của website bạn. Trình duyệt gửi trực tiếp dữ liệu tới cổng thanh toán, nhưng server web của bạn có ảnh hưởng tới form nhập liệu.",
+                icon: "fa-solid fa-file-code",
+                next: "result",
+                recommend: "saq-a-ep"
+            },
+            {
+                title: "Tích hợp API Server-to-Server",
+                desc: "Dữ liệu thẻ được gửi về server của bạn xử lý và lưu trữ đệm trước khi gọi API gửi sang cổng thanh toán.",
+                icon: "fa-solid fa-network-wired",
+                next: "result",
+                recommend: "saq-d-merchant"
+            }
         ]
     },
     {
         id: "q4_retail",
-        text: "Bước 4 (Cửa hàng): Thiết bị hoặc hình thức nhận thông tin thẻ của bạn là gì?",
+        step: 4,
+        text: "Thiết bị hoặc hình thức nhận thông tin thẻ của cửa hàng là gì?",
         options: [
-            { text: "Máy POS độc lập kết nối qua đường dây điện thoại quay số (Dial-out terminal) hoặc cà thẻ cơ học giấy", next: "result", recommend: "saq-b" },
-            { text: "Máy POS độc lập kết nối mạng Internet qua IP/Wi-Fi/4G và không kết nối hệ thống khác", next: "result", recommend: "saq-b-ip" },
-            { text: "Trang thanh toán ảo (Virtual Terminal) nhập thủ công qua trình duyệt web trên 1 máy tính duy nhất", next: "result", recommend: "saq-c-vt" },
-            { text: "Hệ thống POS bán hàng tích hợp (kết nối Internet và mạng nội bộ cửa hàng)", next: "result", recommend: "saq-c" },
-            { text: "Sử dụng giải pháp mã hóa điểm-đến-điểm (P2PE) đã được PCI SSC phê duyệt chính thức", next: "result", recommend: "saq-p2pe" }
+            {
+                title: "POS cơ học hoặc Máy POS quay số",
+                desc: "Chỉ dùng máy in dấu thẻ vật lý hoặc thiết bị POS standalone kết nối qua đường điện thoại quay số (không có internet).",
+                icon: "fa-solid fa-phone-alt",
+                next: "result",
+                recommend: "saq-b"
+            },
+            {
+                title: "Thiết bị POS standalone kết nối mạng IP",
+                desc: "Máy POS đơn lẻ kết nối Internet qua IP/Wi-Fi/4G để truyền dữ liệu và không liên kết với hệ thống máy chủ nội bộ nào khác.",
+                icon: "fa-solid fa-wifi",
+                next: "result",
+                recommend: "saq-b-ip"
+            },
+            {
+                title: "Virtual Terminal (Trình duyệt Web)",
+                desc: "Nhân viên nhập thủ công thông tin thẻ khách hàng vào trang quản trị cổng thanh toán qua trình duyệt web trên một máy tính duy nhất.",
+                icon: "fa-solid fa-desktop",
+                next: "result",
+                recommend: "saq-c-vt"
+            },
+            {
+                title: "Hệ thống POS tích hợp",
+                desc: "Phần mềm POS cài đặt trên máy tính bán hàng, kết nối Internet và tích hợp sâu với mạng nội bộ cửa hàng.",
+                icon: "fa-solid fa-cash-register",
+                next: "result",
+                recommend: "saq-c"
+            },
+            {
+                title: "Giải pháp mã hóa P2PE chuẩn",
+                desc: "Sử dụng các thiết bị thanh toán và giải pháp mã hóa Point-to-Point Encryption (P2PE) đã được hội đồng PCI SSC phê duyệt chính thức.",
+                icon: "fa-solid fa-key",
+                next: "result",
+                recommend: "saq-p2pe"
+            }
         ]
     }
 ];
+
+function resetSaqWizard() {
+    currentWizardQuestionId = "q1";
+    wizardHistory.length = 0;
+    
+    const introDiv = document.getElementById('saq-wizard-intro');
+    const questionsDiv = document.getElementById('saq-wizard-questions');
+    const resPanel = document.getElementById('saq-result-panel');
+    
+    if (introDiv) introDiv.style.display = 'block';
+    if (questionsDiv) questionsDiv.style.display = 'none';
+    if (resPanel) resPanel.style.display = 'none';
+}
+window.resetSaqWizard = resetSaqWizard;
 
 function initSaqSelector() {
     const startBtn = document.getElementById('btn-start-saq-wizard');
@@ -2125,6 +2124,10 @@ function initSaqSelector() {
                 currentWizardQuestionId = "q1";
                 wizardHistory.length = 0;
                 renderWizardQuestion();
+                
+                // Hide the result panel while wizard is active
+                const resPanel = document.getElementById('saq-result-panel');
+                if (resPanel) resPanel.style.display = 'none';
             }
         };
     }
@@ -2132,14 +2135,7 @@ function initSaqSelector() {
     const resetBtn = document.getElementById('btn-reset-wizard');
     if (resetBtn) {
         resetBtn.onclick = () => {
-            currentWizardQuestionId = "q1";
-            wizardHistory.length = 0;
-            if (introDiv && questionsDiv) {
-                introDiv.style.display = 'block';
-                questionsDiv.style.display = 'none';
-                const resPanel = document.getElementById('saq-result-panel');
-                if (resPanel) resPanel.style.display = 'none';
-            }
+            resetSaqWizard();
         };
     }
 
@@ -2155,6 +2151,9 @@ function initSaqSelector() {
 
     if (selectDropdown) {
         selectDropdown.onchange = (e) => {
+            // Reset the wizard to initial/intro state if dropdown is changed manually
+            if (introDiv) introDiv.style.display = 'block';
+            if (questionsDiv) questionsDiv.style.display = 'none';
             showSaqResult(e.target.value);
         };
         
@@ -2174,19 +2173,31 @@ function renderWizardQuestion() {
     const optionsContainer = document.getElementById('wizard-options-container');
     const stepInfo = document.getElementById('wizard-step-info');
     const prevBtn = document.getElementById('btn-prev-wizard');
-    const progressFill = document.getElementById('wizard-progress-fill');
 
     if (questionText) questionText.innerText = q.text;
 
     let totalQuestions = 4;
-    let currentStepNum = 1;
-    if (currentWizardQuestionId === 'q1') currentStepNum = 1;
-    else if (currentWizardQuestionId === 'q2') currentStepNum = 2;
-    else if (currentWizardQuestionId === 'q3') currentStepNum = 3;
-    else if (currentWizardQuestionId.startsWith('q4')) currentStepNum = 4;
+    let currentStepNum = q.step;
+    const questionId = q.id; // Capture locally to prevent race conditions
 
-    const percent = Math.round(((currentStepNum - 1) / totalQuestions) * 100);
-    if (progressFill) progressFill.style.width = `${percent}%`;
+    // Update Stepper visually
+    const stepperSteps = document.querySelectorAll('.saq-stepper .stepper-step');
+    stepperSteps.forEach((step) => {
+        const stepVal = parseInt(step.getAttribute('data-step'));
+        if (stepVal < currentStepNum) {
+            step.className = 'stepper-step completed';
+            const dot = step.querySelector('.step-dot');
+            if (dot) dot.innerHTML = '<i class="fa-solid fa-check"></i>';
+        } else if (stepVal === currentStepNum) {
+            step.className = 'stepper-step active';
+            const dot = step.querySelector('.step-dot');
+            if (dot) dot.innerHTML = getStepIcon(stepVal);
+        } else {
+            step.className = 'stepper-step';
+            const dot = step.querySelector('.step-dot');
+            if (dot) dot.innerHTML = getStepIcon(stepVal);
+        }
+    });
 
     if (stepInfo) stepInfo.innerText = `Bước ${currentStepNum} / ${totalQuestions}`;
     if (prevBtn) {
@@ -2196,30 +2207,11 @@ function renderWizardQuestion() {
     if (optionsContainer) {
         optionsContainer.innerHTML = '';
         q.options.forEach((opt, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'btn btn-secondary btn-block text-left wizard-option-btn';
-            btn.style.textAlign = 'left';
-            btn.style.padding = '10px 14px';
-            btn.style.background = 'rgba(255, 255, 255, 0.02)';
-            btn.style.border = '1px solid var(--border-glass)';
-            btn.style.fontSize = '12px';
-            btn.style.color = 'var(--text-primary)';
-            btn.style.cursor = 'pointer';
-            btn.style.borderRadius = '6px';
-            btn.style.transition = 'all 0.2s';
-
-            btn.onmouseover = () => {
-                btn.style.background = 'rgba(59, 130, 246, 0.08)';
-                btn.style.borderColor = 'var(--color-primary)';
-            };
-            btn.onmouseout = () => {
-                btn.style.background = 'rgba(255, 255, 255, 0.02)';
-                btn.style.borderColor = 'var(--border-glass)';
-            };
-
-            btn.onclick = () => {
+            const card = document.createElement('div');
+            card.className = 'wizard-card-option';
+            card.onclick = () => {
                 if (opt.action) opt.action();
-                wizardHistory.push(currentWizardQuestionId);
+                wizardHistory.push(questionId);
 
                 if (opt.next === 'result') {
                     showWizardResult(opt.recommend);
@@ -2229,9 +2221,28 @@ function renderWizardQuestion() {
                 }
             };
 
-            btn.innerHTML = `<span style="font-weight:700; color: var(--color-primary); margin-right: 8px;">${String.fromCharCode(65 + idx)}.</span> ${opt.text}`;
-            optionsContainer.appendChild(btn);
+            card.innerHTML = `
+                <div class="wizard-option-icon">
+                    <i class="${opt.icon}"></i>
+                </div>
+                <div class="wizard-option-content">
+                    <div class="wizard-option-title">${opt.title}</div>
+                    <div class="wizard-option-desc">${opt.desc}</div>
+                </div>
+            `;
+            optionsContainer.appendChild(card);
         });
+    }
+}
+
+function getStepIcon(step) {
+    switch(step) {
+        case 1: return '<i class="fa-solid fa-user-tie"></i>';
+        case 2: return '<i class="fa-solid fa-database"></i>';
+        case 3: return '<i class="fa-solid fa-route"></i>';
+        case 4: return '<i class="fa-solid fa-network-wired"></i>';
+        case 5: return '<i class="fa-solid fa-award"></i>';
+        default: return '<i class="fa-solid fa-circle"></i>';
     }
 }
 
@@ -2239,8 +2250,16 @@ function showWizardResult(saqType) {
     const questionsDiv = document.getElementById('saq-wizard-questions');
     if (questionsDiv) questionsDiv.style.display = 'none';
 
-    const progressFill = document.getElementById('wizard-progress-fill');
-    if (progressFill) progressFill.style.width = `100%`;
+    // Highlight step 5 (Khuyến Nghị) as completed when result is shown
+    const stepperSteps = document.querySelectorAll('.saq-stepper .stepper-step');
+    stepperSteps.forEach((step) => {
+        const stepVal = parseInt(step.getAttribute('data-step'));
+        if (stepVal <= 5) {
+            step.className = 'stepper-step completed';
+            const dot = step.querySelector('.step-dot');
+            if (dot) dot.innerHTML = '<i class="fa-solid fa-check"></i>';
+        }
+    });
 
     const dropdown = document.getElementById('saq-flow-select');
     if (dropdown) {
@@ -2304,11 +2323,68 @@ function showSaqResult(saqType) {
             </ul>
         </div>
 
-        <div style="border-left: 3px solid var(--color-primary); background: rgba(59, 130, 246, 0.03); padding: 8px 12px; border-radius: 0 6px 6px 0;">
-            <h5 style="font-size: 11px; font-weight: 700; color: #93c5fd; margin: 0 0 4px 0;"><i class="fa-solid fa-circle-nodes" style="margin-right: 6px;"></i>Yêu cầu nộp hồ sơ của QSA/Tổ chức thẻ:</h5>
-            <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">${data.auditReq}</p>
+        <div style="border-left: 3px solid var(--color-primary); background: rgba(59, 130, 246, 0.03); padding: 8px 12px; border-radius: 0 6px 6px 0; display: flex; justify-content: space-between; align-items: center; gap: 15px;">
+            <div>
+                <h5 style="font-size: 11px; font-weight: 700; color: #93c5fd; margin: 0 0 4px 0;"><i class="fa-solid fa-circle-nodes" style="margin-right: 6px;"></i>Yêu cầu nộp hồ sơ của QSA/Tổ chức thẻ:</h5>
+                <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">${data.auditReq}</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="resetSaqWizard()" style="padding: 6px 12px; font-size: 11px; flex-shrink: 0;">
+                <i class="fa-solid fa-rotate-left"></i> Khảo sát lại
+            </button>
         </div>
     `;
+}
+
+// --- REPORT TAB HANDLERS ---
+let activeReportSection = 1;
+
+window.selectReportSection = function(sectionNum) {
+    activeReportSection = sectionNum;
+    
+    // Update active button styling
+    document.querySelectorAll('.report-menu-btn').forEach(btn => btn.classList.remove('active'));
+    const activeBtn = document.getElementById(`btn-report-sec-${sectionNum}`);
+    if (activeBtn) activeBtn.classList.add('active');
+    
+    // Toggle content visibility
+    document.querySelectorAll('.report-section-content').forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+    
+    const activeContent = document.getElementById(`report-sec-content-${sectionNum}`);
+    if (activeContent) {
+        activeContent.style.display = 'block';
+        activeContent.classList.add('active');
+        // Scroll to top of report body content
+        const docBody = document.getElementById('report-doc-body-content');
+        if (docBody) docBody.scrollTop = 0;
+    }
+};
+
+function initReportLibrary() {
+    const copyReportBtn = document.getElementById('btn-copy-report');
+    if (copyReportBtn) {
+        copyReportBtn.onclick = () => {
+            const activeContent = document.getElementById(`report-sec-content-${activeReportSection}`);
+            if (activeContent) {
+                const textToCopy = activeContent.innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = copyReportBtn.innerHTML;
+                    copyReportBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Đã sao chép!`;
+                    copyReportBtn.className = "btn btn-success btn-sm";
+                    
+                    setTimeout(() => {
+                        copyReportBtn.innerHTML = originalText;
+                        copyReportBtn.className = "btn btn-primary btn-sm";
+                    }, 2000);
+                }).catch(err => {
+                    console.error("Lỗi copy: ", err);
+                    alert("Không thể sao chép văn bản tự động!");
+                });
+            }
+        };
+    }
 }
 
 window.addEventListener('DOMContentLoaded', init);

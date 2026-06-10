@@ -1,0 +1,17 @@
+PCI DSS Gap Assessment
+
+Giả sử có một doanh nghiệp giả định.
+
+Bao gồm:
+
+Scope
+Cardholder Data Environment (CDE)
+Network diagram
+Asset inventory
+Các requirement PCI DSS
+Evidence cần thu thập
+Gap
+Recommendation
+Remediation plan
+
+-> Viết thành một báo cáo khoảng 40–80 trang.
