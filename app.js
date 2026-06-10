@@ -29,7 +29,7 @@ const state = {
             risk: "high",
             remediation: "Đổi toàn bộ mật khẩu mặc định thiết bị mạng và biên soạn bộ quy chuẩn System Hardening dựa trên CIS Benchmarks.",
             specDesc: "Áp dụng cấu hình an toàn cho tất cả các thành phần hệ thống. Thay đổi mật khẩu mặc định của nhà sản xuất, vô hiệu hóa các cổng/dịch vụ không cần thiết và thực hiện hardening hệ điều hành/phần mềm.",
-            riskImpact: "Hacker dễ dàng chiếm quyền quản trị thiết bị bằng các tài khoản mặc định được công bố công khai trên mạng, từ đó xâm nhập sâu vào hệ thống DieuPay.",
+            riskImpact: "Hacker dễ dàng chiếm quyền quản trị thiết bị bằng các tài khoản mặc định được công bố công khai trên mạng, từ đó xâm nhập sâu vào hệ thống NTDPay.",
             steps: [
                 "Scanning internal switch infrastructure for default credentials...",
                 "Device: Corp-Switch-01 -> Found defaults (admin/admin). Resetting credentials...",
@@ -124,7 +124,7 @@ const state = {
             risk: "high",
             remediation: "Kích hoạt MFA (OTP Google Authenticator) cho VPN/Bastion và tăng độ dài mật khẩu AD tối thiểu lên 12 ký tự.",
             specDesc: "Xác định danh tính và xác thực quyền truy cập vào các thành phần hệ thống. Cấp Unique ID riêng cho mỗi nhân sự, áp dụng chính sách mật khẩu mạnh và bắt buộc xác thực đa yếu tố (MFA) đối với mọi truy cập quản trị từ xa.",
-            riskImpact: "Không có MFA, tin tặc chỉ cần dò ra mật khẩu (hoặc mua lại mật khẩu bị lộ) là có thể đăng nhập trực tiếp vào hệ thống quản trị Bastion Host hoặc mạng VPN nội bộ của DieuPay.",
+            riskImpact: "Không có MFA, tin tặc chỉ cần dò ra mật khẩu (hoặc mua lại mật khẩu bị lộ) là có thể đăng nhập trực tiếp vào hệ thống quản trị Bastion Host hoặc mạng VPN nội bộ của NTDPay.",
             steps: [
                 "Modifying Active Directory Domain Password Policy...",
                 "Updating Group Policy (GPO): Minimum Password Length = 12 characters.",
@@ -194,7 +194,7 @@ const state = {
             ],
             securityCompliant: [
                 "Chỉ bắt tay bằng TLS 1.3 mã hóa cực mạnh.",
-                "Giao diện nhập liệu sử dụng Hosted Fields an toàn của DieuPay."
+                "Giao diện nhập liệu sử dụng Hosted Fields an toàn của NTDPay."
             ]
         },
         admin: {
@@ -264,7 +264,7 @@ const state = {
             purpose: "Tổ chức chuyển mạch giao dịch tài chính quốc tế và nội địa",
             scope: "Out-of-Scope (Bên thứ ba)",
             securityNonCompliant: [
-                "Giao tiếp qua đường truyền Leased-line nhưng chưa được DieuPay mã hóa gói tin ở lớp ứng dụng (chỉ dựa vào bảo mật đường truyền)."
+                "Giao tiếp qua đường truyền Leased-line nhưng chưa được NTDPay mã hóa gói tin ở lớp ứng dụng (chỉ dựa vào bảo mật đường truyền)."
             ],
             securityCompliant: [
                 "Mã hóa gói tin giao dịch chuẩn ISO 8583 bằng khóa đối tác được sinh và bảo vệ bởi HSM."
@@ -643,7 +643,7 @@ dom.btnRemediateAll.addEventListener('click', () => {
         if (nonCompliantReqs.length === 0) {
             state.isRemediating = false;
             calculateCompliance();
-            addConsoleLog("[SUCCESS] Toàn bộ hệ thống CDE của DieuPay đã đạt 100% tuân thủ tiêu chuẩn PCI DSS v4.0!", "success");
+            addConsoleLog("[SUCCESS] Toàn bộ hệ thống CDE của NTDPay đã đạt 100% tuân thủ tiêu chuẩn PCI DSS v4.0!", "success");
             return;
         }
 
@@ -684,7 +684,7 @@ function initTabs() {
 
             if (targetTab === 'tab-dashboard') {
                 title = 'Bảng Điều Khiển Tuân Thủ PCI DSS v4.0';
-                subtitle = 'Giám sát hiện trạng khoảng cách bảo mật và quản lý khắc phục hệ thống DieuPay';
+                subtitle = 'Giám sát hiện trạng khoảng cách bảo mật và quản lý khắc phục hệ thống NTDPay';
             } else if (targetTab === 'tab-simulator') {
                 title = 'Mô Phỏng Luồng Giao Dịch Thẻ';
                 subtitle = 'Thực hiện thanh toán giả định và phân tích luồng truyền dữ liệu qua CDE';
@@ -693,16 +693,16 @@ function initTabs() {
                 subtitle = 'Hệ thống ranh giới bảo mật mạng CDE tại AWS Cloud và Viettel IDC';
             } else if (targetTab === 'tab-scanner') {
                 title = 'Quét Lỗ Hổng & Kiểm Thử Phòng Thủ';
-                subtitle = 'Dò quét các mã số lỗi CVE và giả lập các cuộc tấn công mạng an ninh vào DieuPay';
+                subtitle = 'Dò quét các mã số lỗi CVE và giả lập các cuộc tấn công mạng an ninh vào NTDPay';
             } else if (targetTab === 'tab-saq') {
                 title = 'Tự Đánh Giá Tuân Thủ SAQ';
                 subtitle = 'Xác định loại báo cáo tự đánh giá SAQ phù hợp và điền bảng hỏi kiểm toán';
             } else if (targetTab === 'tab-policies') {
                 title = 'Thư Viện Chính Sách Bảo Mật';
-                subtitle = 'Hệ thống quy trình và tài liệu quy chuẩn an toàn thông tin của DieuPay';
+                subtitle = 'Hệ thống quy trình và tài liệu quy chuẩn an toàn thông tin của NTDPay';
             } else if (targetTab === 'tab-report') {
                 title = 'Báo Cáo Đánh Giá Khoảng Cách PCI DSS';
-                subtitle = 'Báo cáo chi tiết hiện trạng, rủi ro và lộ trình tuân thủ PCI DSS v4.0.1 của DieuPay';
+                subtitle = 'Báo cáo chi tiết hiện trạng, rủi ro và lộ trình tuân thủ PCI DSS v4.0.1 của NTDPay';
             }
 
             document.getElementById('page-title-text').innerText = title;
@@ -1244,7 +1244,7 @@ function runSecurityScan() {
     dom.scanProgressArea.style.display = 'block';
     dom.scanProgressBar.style.width = '0%';
     dom.scanProgressBar.innerText = '0%';
-    dom.scanStatusText.innerText = 'Bắt đầu khởi động quét an ninh DieuPay CDE...';
+    dom.scanStatusText.innerText = 'Bắt đầu khởi động quét an ninh NTDPay CDE...';
 
     let progress = 0;
     const scanSteps = [
@@ -1312,7 +1312,7 @@ function renderScanReport() {
         cleanMessage.innerHTML = `
             <i class="fa-solid fa-circle-check" style="font-size: 44px; color: var(--color-success); margin-bottom: 15px; display: block;"></i>
             <strong style="color: var(--color-success); display: block; font-size: 13px;">HỆ THỐNG HOÀN TOÀN SẠCH & AN TOÀN</strong>
-            <p class="text-muted mt-5" style="font-size: 11px;">Không tìm thấy bất kỳ CVE lỗ hổng nào hoạt động. DieuPay đáp ứng 100% tiêu chuẩn PCI DSS v4.0.1</p>
+            <p class="text-muted mt-5" style="font-size: 11px;">Không tìm thấy bất kỳ CVE lỗ hổng nào hoạt động. NTDPay đáp ứng 100% tiêu chuẩn PCI DSS v4.0.1</p>
         `;
         dom.scanReportContainer.appendChild(cleanMessage);
         return;
@@ -1485,9 +1485,9 @@ const POLICIES = [
             <p><strong>Mã tài liệu:</strong> DP-SEC-POL-03 | <strong>Phiên bản:</strong> 1.0 | <strong>Hiệu lực:</strong> 10/06/2026</p>
             <hr style="border: 0; border-top: 1px solid var(--border-glass); margin: 15px 0;">
             <h2>1. Mục đích</h2>
-            <p>Chính sách này quy định các nguyên tắc quản lý khóa mật mã (khóa chính, khóa mã hóa dữ liệu) nhằm bảo vệ thông tin thẻ tín dụng (PAN) lưu trữ tĩnh trên hệ thống DieuPay đáp ứng Yêu cầu 3 của tiêu chuẩn PCI DSS v4.0.</p>
+            <p>Chính sách này quy định các nguyên tắc quản lý khóa mật mã (khóa chính, khóa mã hóa dữ liệu) nhằm bảo vệ thông tin thẻ tín dụng (PAN) lưu trữ tĩnh trên hệ thống NTDPay đáp ứng Yêu cầu 3 của tiêu chuẩn PCI DSS v4.0.</p>
             <h2>2. Phạm vi áp dụng</h2>
-            <p>Áp dụng cho toàn bộ thiết bị HSM, máy chủ Core Payment, CSDL PostgreSQL và các nhân sự quản trị khóa (Custodians) tại DieuPay.</p>
+            <p>Áp dụng cho toàn bộ thiết bị HSM, máy chủ Core Payment, CSDL PostgreSQL và các nhân sự quản trị khóa (Custodians) tại NTDPay.</p>
             <h2>3. Nội dung quy định</h2>
             <h3>3.1. Phân tầng khóa mật mã (Key Hierarchy)</h3>
             <ul>
@@ -1517,11 +1517,11 @@ const POLICIES = [
             <p><strong>Mã tài liệu:</strong> DP-SEC-POL-08 | <strong>Phiên bản:</strong> 1.0 | <strong>Hiệu lực:</strong> 10/06/2026</p>
             <hr style="border: 0; border-top: 1px solid var(--border-glass); margin: 15px 0;">
             <h2>1. Nguyên tắc chung</h2>
-            <p>DieuPay áp dụng nguyên tắc <strong>"Least Privilege" (Đặc quyền tối thiểu)</strong> và <strong>"Need-to-Know" (Cần biết mới cung cấp)</strong> đối với tất cả tài khoản truy cập vào Môi trường dữ liệu chủ thẻ (CDE) đáp ứng Yêu cầu 7 và Yêu cầu 8 của PCI DSS.</p>
+            <p>NTDPay áp dụng nguyên tắc <strong>"Least Privilege" (Đặc quyền tối thiểu)</strong> và <strong>"Need-to-Know" (Cần biết mới cung cấp)</strong> đối với tất cả tài khoản truy cập vào Môi trường dữ liệu chủ thẻ (CDE) đáp ứng Yêu cầu 7 và Yêu cầu 8 của PCI DSS.</p>
             <h2>2. Quy định kỹ thuật</h2>
             <h3>2.1. Xác thực đa yếu tố (MFA) bắt buộc</h3>
             <ul>
-                <li>Mọi kết nối quản trị từ xa (VPN SSL) của kỹ sư vào hệ thống mạng DieuPay bắt buộc phải xác thực lớp thứ hai bằng mã OTP biến động sinh ra từ Google Authenticator.</li>
+                <li>Mọi kết nối quản trị từ xa (VPN SSL) của kỹ sư vào hệ thống mạng NTDPay bắt buộc phải xác thực lớp thứ hai bằng mã OTP biến động sinh ra từ Google Authenticator.</li>
                 <li>Mọi phiên đăng nhập SSH/RDP vào máy chủ trong CDE qua Bastion Host bắt buộc xác thực qua SSH Key cá nhân kết hợp mã MFA cá nhân. Không sử dụng chung tài khoản quản trị (như shared-root or administrator).</li>
             </ul>
             <h3>2.2. Chính sách mật khẩu Active Directory (GPO)</h3>
@@ -1546,7 +1546,7 @@ const POLICIES = [
             <p><strong>Mã tài liệu:</strong> DP-SEC-PLAN-12 | <strong>Phiên bản:</strong> 1.0 | <strong>Hiệu lực:</strong> 10/06/2026</p>
             <hr style="border: 0; border-top: 1px solid var(--border-glass); margin: 15px 0;">
             <h2>1. Mục tiêu</h2>
-            <p>Đảm bảo phản ứng nhanh chóng, giảm thiểu tối đa thiệt hại khi phát hiện hành vi xâm nhập trái phép hoặc rò rỉ dữ liệu thẻ thanh toán (Data Breach) của DieuPay đáp ứng Yêu cầu 12.10 của PCI DSS v4.0.</p>
+            <p>Đảm bảo phản ứng nhanh chóng, giảm thiểu tối đa thiệt hại khi phát hiện hành vi xâm nhập trái phép hoặc rò rỉ dữ liệu thẻ thanh toán (Data Breach) của NTDPay đáp ứng Yêu cầu 12.10 của PCI DSS v4.0.</p>
             <h2>2. Các bước phản ứng sự cố (IR Steps)</h2>
             <ol>
                 <li><strong>Chuẩn bị (Preparation):</strong> Đội SOC liên tục trực giám sát 24/7 qua Wazuh SIEM, chuẩn bị các kịch bản ứng phó khẩn cấp và công cụ sao lưu.</li>
@@ -1562,7 +1562,7 @@ const POLICIES = [
                 <li><strong>Bài học kinh nghiệm (Lessons Learned):</strong> Họp rút kinh nghiệm, báo cáo cơ quan chức năng và tổ chức thẻ quốc tế (Visa/Mastercard/Napas) trong vòng 24 giờ kể từ khi phát hiện rò rỉ dữ liệu thẻ rõ.</li>
             </ol>
             <div class="policy-note">
-                <strong>Đường dây nóng sự cố:</strong> Khi phát hiện rò rỉ thông tin thẻ, nhân viên lập tức liên hệ đội ứng cứu khẩn cấp CERT qua số nội bộ 911 hoặc email cert@dieupay.vn.
+                <strong>Đường dây nóng sự cố:</strong> Khi phát hiện rò rỉ thông tin thẻ, nhân viên lập tức liên hệ đội ứng cứu khẩn cấp CERT qua số nội bộ 911 hoặc email cert@NTDPay.vn.
             </div>
         `
     },
@@ -1577,7 +1577,7 @@ const POLICIES = [
             <p><strong>Mã tài liệu:</strong> DP-SEC-POL-01 | <strong>Phiên bản:</strong> 1.0 | <strong>Hiệu lực:</strong> 10/06/2026</p>
             <hr style="border: 0; border-top: 1px solid var(--border-glass); margin: 15px 0;">
             <h2>1. Mục đích</h2>
-            <p>Thiết lập và quản lý ranh giới an toàn cho Môi trường dữ liệu chủ thẻ (CDE) của DieuPay, đảm bảo vùng CDE được cô lập hoàn toàn khỏi mạng nội bộ văn phòng và Internet, đáp ứng Yêu cầu 1 của PCI DSS.</p>
+            <p>Thiết lập và quản lý ranh giới an toàn cho Môi trường dữ liệu chủ thẻ (CDE) của NTDPay, đảm bảo vùng CDE được cô lập hoàn toàn khỏi mạng nội bộ văn phòng và Internet, đáp ứng Yêu cầu 1 của PCI DSS.</p>
             <h2>2. Quy định phân tách mạng</h2>
             <h3>2.1. Phân vùng mạng (Network Segmentation)</h3>
             <ul>
@@ -1725,7 +1725,7 @@ function updateSaqProgress(percent, compliantCount, total) {
                         <div class="aoc-cert-column">
                             <div>
                                 <span class="aoc-cert-label">Đơn vị được đánh giá (Merchant):</span>
-                                <div class="aoc-cert-value">Công ty Cổ phần Công nghệ Thanh toán Việt Nam (DieuPay)</div>
+                                <div class="aoc-cert-value">Công ty Cổ phần Công nghệ Thanh toán Việt Nam (NTDPay)</div>
                             </div>
                             <div>
                                 <span class="aoc-cert-label">Hạ tầng đánh giá:</span>
@@ -1764,7 +1764,7 @@ function updateSaqProgress(percent, compliantCount, total) {
                     <div style="font-size: 28px; color: var(--color-danger); filter: drop-shadow(0 0 5px rgba(239,68,68,0.3));"><i class="fa-solid fa-stamp"></i></div>
                     <div>
                         <h5 style="font-size: 12px; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Attestation of Compliance (AoC) chưa được mở khóa</h5>
-                        <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">Hệ thống DieuPay hiện chưa đáp ứng 100% tuân thủ tiêu chuẩn PCI DSS. Hãy khắc phục tất cả khoảng cách bảo mật (Gaps) tại Bảng điều khiển chính hoặc chuyển đổi Chế độ mô phỏng sang "Đã tuân thủ" để mở khóa bản chứng nhận tuân thủ chính thức từ chuyên gia QSA.</p>
+                        <p style="font-size: 11px; line-height: 1.45; color: var(--text-secondary); margin: 0;">Hệ thống NTDPay hiện chưa đáp ứng 100% tuân thủ tiêu chuẩn PCI DSS. Hãy khắc phục tất cả khoảng cách bảo mật (Gaps) tại Bảng điều khiển chính hoặc chuyển đổi Chế độ mô phỏng sang "Đã tuân thủ" để mở khóa bản chứng nhận tuân thủ chính thức từ chuyên gia QSA.</p>
                     </div>
                 </div>
             `;
@@ -1836,7 +1836,7 @@ function loadActivePolicy() {
     if (!policy || !docBodyContent) return;
 
     if (docTitle) docTitle.innerText = policy.title;
-    if (docMetadata) docMetadata.innerText = `Mã tài liệu: ${policy.code} | Phiên bản: ${policy.version} | DieuPay Security standards`;
+    if (docMetadata) docMetadata.innerText = `Mã tài liệu: ${policy.code} | Phiên bản: ${policy.version} | NTDPay Security standards`;
 
     docBodyContent.innerHTML = policy.content;
 }
@@ -2099,11 +2099,11 @@ const WIZARD_QUESTIONS = [
 function resetSaqWizard() {
     currentWizardQuestionId = "q1";
     wizardHistory.length = 0;
-    
+
     const introDiv = document.getElementById('saq-wizard-intro');
     const questionsDiv = document.getElementById('saq-wizard-questions');
     const resPanel = document.getElementById('saq-result-panel');
-    
+
     if (introDiv) introDiv.style.display = 'block';
     if (questionsDiv) questionsDiv.style.display = 'none';
     if (resPanel) resPanel.style.display = 'none';
@@ -2124,7 +2124,7 @@ function initSaqSelector() {
                 currentWizardQuestionId = "q1";
                 wizardHistory.length = 0;
                 renderWizardQuestion();
-                
+
                 // Hide the result panel while wizard is active
                 const resPanel = document.getElementById('saq-result-panel');
                 if (resPanel) resPanel.style.display = 'none';
@@ -2156,7 +2156,7 @@ function initSaqSelector() {
             if (questionsDiv) questionsDiv.style.display = 'none';
             showSaqResult(e.target.value);
         };
-        
+
         // Initial call
         const resPanel = document.getElementById('saq-result-panel');
         if (resPanel && resPanel.style.display !== 'block') {
@@ -2236,7 +2236,7 @@ function renderWizardQuestion() {
 }
 
 function getStepIcon(step) {
-    switch(step) {
+    switch (step) {
         case 1: return '<i class="fa-solid fa-user-tie"></i>';
         case 2: return '<i class="fa-solid fa-database"></i>';
         case 3: return '<i class="fa-solid fa-route"></i>';
@@ -2338,20 +2338,20 @@ function showSaqResult(saqType) {
 // --- REPORT TAB HANDLERS ---
 let activeReportSection = 1;
 
-window.selectReportSection = function(sectionNum) {
+window.selectReportSection = function (sectionNum) {
     activeReportSection = sectionNum;
-    
+
     // Update active button styling
     document.querySelectorAll('.report-menu-btn').forEach(btn => btn.classList.remove('active'));
     const activeBtn = document.getElementById(`btn-report-sec-${sectionNum}`);
     if (activeBtn) activeBtn.classList.add('active');
-    
+
     // Toggle content visibility
     document.querySelectorAll('.report-section-content').forEach(content => {
         content.style.display = 'none';
         content.classList.remove('active');
     });
-    
+
     const activeContent = document.getElementById(`report-sec-content-${sectionNum}`);
     if (activeContent) {
         activeContent.style.display = 'block';
@@ -2373,7 +2373,7 @@ function initReportLibrary() {
                     const originalText = copyReportBtn.innerHTML;
                     copyReportBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> Đã sao chép!`;
                     copyReportBtn.className = "btn btn-success btn-sm";
-                    
+
                     setTimeout(() => {
                         copyReportBtn.innerHTML = originalText;
                         copyReportBtn.className = "btn btn-primary btn-sm";
