@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DieuPay PCI DSS v4.0 Simulator & Compliance Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo-area">
+                <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="logo-text">
+                    <h2>DieuPay</h2>
+                    <span>PCI DSS v4.0.1 Portal</span>
+                </div>
+            </div>
+
+            <nav class="nav-menu">
+                <button class="nav-btn active" data-tab="tab-dashboard" id="btn-tab-dashboard">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Bảng Điều Khiển</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-simulator" id="btn-tab-simulator">
+                    <i class="fa-solid fa-credit-card"></i>
+                    <span>Mô Phỏng Giao Dịch</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-network" id="btn-tab-network">
+                    <i class="fa-solid fa-network-wired"></i>
+                    <span>Sơ Đồ Mạng CDE</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-scanner" id="btn-tab-scanner">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>Dò Lỗi & Tấn Công</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-saq" id="btn-tab-saq">
+                    <i class="fa-solid fa-file-signature"></i>
+                    <span>Tự Đánh Giá SAQ</span>
+                </button>
+                <button class="nav-btn" data-tab="tab-policies" id="btn-tab-policies">
+                    <i class="fa-solid fa-book-bookmark"></i>
+                    <span>Chính Sách Bảo Mật</span>
+                </button>
+            </nav>
+
+            <div class="compliance-summary-card">
+                <h3>Tỷ Lệ Tuân Thủ</h3>
+                <div class="progress-circle-container">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring__background" stroke="rgba(255,255,255,0.05)" stroke-width="8"
+                            fill="transparent" r="50" cx="60" cy="60" />
+                        <circle class="progress-ring__circle" id="compliance-ring" stroke="#ef4444" stroke-width="8"
+                            fill="transparent" r="50" cx="60" cy="60" />
+                    </svg>
+                    <div class="progress-value" id="compliance-score-val">31%</div>
+                </div>
+                <div class="status-summary">
+                    <div class="status-item">
+                        <span class="dot green"></span>
+                        <span id="txt-compliant-count">4 / 12 Đạt</span>
+                    </div>
+                    <div class="status-item mt-5">
+                        <span class="dot red"></span>
+                        <span id="txt-noncompliant-count">8 / 12 Lỗi</span>
+                    </div>
+                </div>
+                <button class="btn btn-primary btn-block mt-15" id="btn-remediate-all">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Khắc Phục Toàn Bộ
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="page-title">
+                    <h1 id="page-title-text">Bảng Điều Khiển Tuân Thủ PCI DSS v4.0</h1>
+                    <p id="page-subtitle-text">Giám sát hiện trạng khoảng cách bảo mật và quản lý khắc phục hệ thống
+                        DieuPay</p>
+                </div>
+                <div class="system-status">
+                    <span class="status-badge red" id="system-status-badge">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Hệ thống có rủi ro cao
+                    </span>
+                </div>
+            </header>
+
+            <!-- TAB 1: COMPLIANCE DASHBOARD -->
+            <section class="tab-content active" id="tab-dashboard">
+                <div class="dashboard-grid">
+                    <!-- Stat Cards -->
+                    <div class="stat-card gap-card">
+                        <div class="card-icon red-glow"><i class="fa-solid fa-circle-exclamation"></i></div>
+                        <div class="card-info">
+                            <span class="info-label">Khoảng Cách Phát Hiện (Gaps)</span>
+                            <span class="info-value" id="stat-gaps-count">17 Lỗ Hổng</span>
+                        </div>
+                    </div>
+                    <div class="stat-card risk-card">
+                        <div class="card-icon orange-glow"><i class="fa-solid fa-radiation"></i></div>
+                        <div class="card-info">
+                            <span class="info-label">Rủi Ro Nguy Kịch (Critical)</span>
+                            <span class="info-value" id="stat-critical-count">3 Rủi Ro</span>
+                        </div>
+                    </div>
+                    <div class="stat-card method-card">
+                        <div class="card-icon blue-glow"><i class="fa-solid fa-arrows-spin"></i></div>
+                        <div class="card-info">
+                            <span class="info-label">Phiên Bản Đánh Giá</span>
+                            <span class="info-value">PCI DSS v4.0.1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 12 Requirements List -->
+                <div class="section-card mt-25">
+                    <div class="card-header card-header-flex">
+                        <div>
+                            <h2 style="display: flex; align-items: center; gap: 8px;"><i
+                                    class="fa-solid fa-clipboard-list" style="color: var(--color-primary);"></i> Đánh
+                                Giá Chi Tiết 12 Yêu Cầu Bảo Mật</h2>
+                            <p>Danh sách các yêu cầu kiểm soát bắt buộc và trạng thái tuân thủ thực tế của hệ thống
+                                DieuPay</p>
+                        </div>
+                        <button class="btn btn-primary" id="btn-print-report">
+                            <i class="fa-solid fa-print"></i> Xuất Báo Cáo Tuân Thủ
+                        </button>
+                    </div>
+                    <div class="requirements-list" id="requirements-container">
+                        <!-- Requirements items will be dynamically rendered by JavaScript -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: TRANSACTION SIMULATOR -->
+            <section class="tab-content" id="tab-simulator">
+                <div class="simulator-layout">
+                    <!-- Simulator Controls & Form -->
+                    <div class="sim-left-panel">
+                        <!-- Mode Toggle -->
+                        <div class="section-card">
+                            <h3 style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-sliders"
+                                    style="color: var(--color-primary);"></i> Chế Độ Mô Phỏng An Ninh</h3>
+                            <p class="text-muted mb-15">Chọn chế độ để kiểm chứng cách hệ thống DieuPay xử lý và lưu trữ
+                                thông tin thẻ.</p>
+                            <div class="mode-toggle-group">
+                                <button class="mode-btn active red-mode" id="btn-mode-noncompliant">
+                                    <i class="fa-solid fa-bug"></i>
+                                    <div class="mode-text">
+                                        <strong>Chưa Tuân Thủ</strong>
+                                        <span>Dễ bị tấn công, lộ dữ liệu</span>
+                                    </div>
+                                </button>
+                                <button class="mode-btn green-mode" id="btn-mode-compliant">
+                                    <i class="fa-solid fa-shield-halved"></i>
+                                    <div class="mode-text">
+                                        <strong>Đã Tuân Thủ</strong>
+                                        <span>Mã hóa HSM, Log Sanitized</span>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Trạng Thái Bảo Mật Hệ Thống -->
+                        <div class="section-card mt-20 security-status-panel" id="security-warnings-panel">
+                            <h3 style="display: flex; align-items: center; gap: 8px;"><i
+                                    class="fa-solid fa-shield-halved" style="color: var(--color-primary);"></i> Trạng
+                                Thái Bảo Mật Hệ Thống</h3>
+                            <div id="security-warnings-content">
+                                <!-- Nội dung cập nhật động từ Javascript -->
+                            </div>
+                        </div>
+
+                        <!-- Payment Checkout Form Mockup -->
+                        <div class="section-card mt-20 payment-card-form">
+                            <div class="payment-card-header">
+                                <i class="fa-solid fa-wallet"></i>
+                                <span>Cổng Thanh Toán DieuPay (Mockup Checkout)</span>
+                            </div>
+                            <div class="card-preview">
+                                <div class="card-chip"></div>
+                                <div class="card-number-preview" id="preview-number">•••• •••• •••• ••••</div>
+                                <div class="card-details-preview">
+                                    <div>
+                                        <span class="preview-label">CHỦ THẺ</span>
+                                        <span class="preview-value" id="preview-name">NGUYEN VAN A</span>
+                                    </div>
+                                    <div>
+                                        <span class="preview-label">HẠN DÙNG</span>
+                                        <span class="preview-value" id="preview-expiry">12/28</span>
+                                    </div>
+                                </div>
+                                <div class="card-brand"><i class="fa-brands fa-cc-visa"></i></div>
+                            </div>
+
+                            <form id="payment-form" onsubmit="return false;">
+                                <div class="form-group">
+                                    <label for="card-holder">Tên trên thẻ</label>
+                                    <input type="text" id="card-holder" value="NGUYEN VAN A" placeholder="NGUYEN VAN A"
+                                        autocomplete="off" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="card-number">Số thẻ tín dụng (PAN)</label>
+                                    <div class="input-icon-wrapper">
+                                        <i class="fa-solid fa-credit-card input-icon"></i>
+                                        <input type="text" id="card-number" value="4111110022334455"
+                                            placeholder="4111 1100 2233 4455" maxlength="19" autocomplete="off"
+                                            required>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-6">
+                                        <label for="card-expiry">Ngày hết hạn</label>
+                                        <input type="text" id="card-expiry" value="12/28" placeholder="MM/YY"
+                                            maxlength="5" autocomplete="off" required>
+                                    </div>
+                                    <div class="form-group col-6">
+                                        <label for="card-cvv">Mã bảo mật (CVV2)</label>
+                                        <input type="password" id="card-cvv" value="123" placeholder="123" maxlength="4"
+                                            autocomplete="off" required>
+                                    </div>
+                                </div>
+                                <button class="btn btn-success btn-block mt-15" id="btn-submit-payment">
+                                    <i class="fa-solid fa-lock"></i> Thanh Toán Ngay (150,000 đ)
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Visual Flow & Real-time Outputs -->
+                    <div class="sim-right-panel">
+                        <!-- Transaction Visual Flow Animation -->
+                        <div class="section-card flex-grow-1 flex-col">
+                            <h3 style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-route"
+                                    style="color: var(--color-primary);"></i> Tiến Trình Truyền Tải Dữ Liệu</h3>
+                            <p class="text-muted mb-15">Theo dõi đường đi của thông tin thẻ qua các thành phần của
+                                DieuPay.</p>
+
+                            <div class="flow-container">
+                                <div class="flow-node active" id="node-client"
+                                    data-tooltip="Thiết bị Khách hàng (Nhập PAN, CVV)">
+                                    <i class="fa-solid fa-laptop"></i>
+                                    <span>Client App</span>
+                                </div>
+                                <div class="flow-connector" id="conn-client-apigw">
+                                    <div class="flow-dot"></div>
+                                </div>
+                                <div class="flow-node" id="node-apigw"
+                                    data-tooltip="API Gateway & WAF (AWS Singapore Subnet)">
+                                    <i class="fa-solid fa-gears"></i>
+                                    <span>API Gateway</span>
+                                </div>
+                                <div class="flow-connector" id="conn-apigw-core">
+                                    <div class="flow-dot"></div>
+                                </div>
+                                <div class="flow-node" id="node-core"
+                                    data-tooltip="Payment Core Processing (Viettel IDC CDE Zone)">
+                                    <i class="fa-solid fa-microchip"></i>
+                                    <span>Core Payment</span>
+                                </div>
+                                <div class="flow-connector-split" id="split-core">
+                                    <div class="split-line-hsm" id="conn-core-hsm">
+                                        <div class="flow-dot-hsm"></div>
+                                    </div>
+                                    <div class="split-line-db" id="conn-core-db">
+                                        <div class="flow-dot-db"></div>
+                                    </div>
+                                </div>
+                                <div class="split-nodes">
+                                    <div class="flow-node small" id="node-hsm"
+                                        data-tooltip="Thiết bị Mật mã HSM (Sinh Token / Giải mã)">
+                                        <i class="fa-solid fa-key"></i>
+                                        <span>HSM Key</span>
+                                    </div>
+                                    <div class="flow-node small" id="node-db"
+                                        data-tooltip="Cơ sở dữ liệu PostgreSQL (Lưu trữ giao dịch)">
+                                        <i class="fa-solid fa-database"></i>
+                                        <span>PostgreSQL</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Logs & DB Records -->
+                        <div class="section-card mt-20 console-panel">
+                            <div class="console-header">
+                                <ul class="console-tabs">
+                                    <li class="active" data-console="console-logs" id="btn-console-logs"><i
+                                            class="fa-solid fa-terminal"></i> Nhật Ký Hệ Thống (System Logs)</li>
+                                    <li data-console="console-db" id="btn-console-db"><i
+                                            class="fa-solid fa-database"></i> Cơ Sở Dữ Liệu (PostgreSQL Storage)</li>
+                                </ul>
+                            </div>
+                            <div class="console-body">
+                                <div class="console-content active" id="console-logs">
+                                    <div class="log-line text-muted">// Hệ thống DieuPay sẵn sàng. Nhấn "Thanh Toán
+                                        Ngay" để mô phỏng.</div>
+                                </div>
+                                <div class="console-content" id="console-db">
+                                    <table class="db-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã GD</th>
+                                                <th>Thời gian</th>
+                                                <th>Khách hàng</th>
+                                                <th>Dữ liệu thẻ (PAN)</th>
+                                                <th>Mã CVV2</th>
+                                                <th>Trạng thái lưu trữ</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="db-table-body">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted">// Cơ sở dữ liệu trống.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: NETWORK DIAGRAM MAP -->
+            <section class="tab-content" id="tab-network">
+                <div class="network-layout">
+                    <!-- Left: Interactive Topology SVG -->
+                    <div class="network-map-card">
+                        <div class="network-map-header">
+                            <h3 style="display: flex; align-items: center; gap: 8px;"><i
+                                    class="fa-solid fa-network-wired" style="color: var(--color-primary);"></i> Sơ Đồ
+                                Phân Tách Mạng & Ranh Giới Bảo Mật CDE</h3>
+                            <p class="text-muted">Di chuột hoặc nhấp vào các nút thiết bị để xem thông tin an ninh chi
+                                tiết</p>
+                        </div>
+                        <div class="network-map-body" id="network-map-container">
+                            <!-- Inline SVG for Network Map -->
+                            <svg viewBox="0 0 1000 540" class="network-svg">
+                                <defs>
+                                    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                        <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(255,255,255,0.015)"
+                                            stroke-width="1" />
+                                    </pattern>
+
+                                    <!-- Gradients for Zones -->
+                                    <linearGradient id="grad-internet" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="rgba(148, 163, 184, 0.08)" />
+                                        <stop offset="100%" stop-color="rgba(148, 163, 184, 0.01)" />
+                                    </linearGradient>
+                                    <linearGradient id="grad-aws" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="rgba(59, 130, 246, 0.08)" />
+                                        <stop offset="100%" stop-color="rgba(59, 130, 246, 0.01)" />
+                                    </linearGradient>
+                                    <linearGradient id="grad-cde-danger" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="rgba(239, 68, 68, 0.06)" />
+                                        <stop offset="100%" stop-color="rgba(239, 68, 68, 0.01)" />
+                                    </linearGradient>
+                                    <linearGradient id="grad-cde-secure" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="rgba(16, 185, 129, 0.08)" />
+                                        <stop offset="100%" stop-color="rgba(16, 185, 129, 0.01)" />
+                                    </linearGradient>
+                                    <linearGradient id="grad-mgmt" x1="0%" y1="0%" x2="100%" y2="100%">
+                                        <stop offset="0%" stop-color="rgba(245, 158, 11, 0.06)" />
+                                        <stop offset="100%" stop-color="rgba(245, 158, 11, 0.01)" />
+                                    </linearGradient>
+
+                                    <!-- Markers for arrows -->
+                                    <marker id="arrow-blue" viewBox="0 0 10 10" refX="29" refY="5" markerWidth="6"
+                                        markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--color-primary)" />
+                                    </marker>
+                                    <marker id="arrow-green" viewBox="0 0 10 10" refX="29" refY="5" markerWidth="6"
+                                        markerHeight="6" orient="auto-start-reverse">
+                                        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--color-success)" />
+                                    </marker>
+                                    <marker id="arrow-gray" viewBox="0 0 10 10" refX="27" refY="5" markerWidth="5"
+                                        markerHeight="5" orient="auto-start-reverse">
+                                        <path d="M 0 2 L 6 5 L 0 8 z" fill="rgba(255,255,255,0.2)" />
+                                    </marker>
+                                    <marker id="arrow-mgmt" viewBox="0 0 10 10" refX="27" refY="5" markerWidth="5"
+                                        markerHeight="5" orient="auto-start-reverse">
+                                        <path d="M 0 2 L 6 5 L 0 8 z" fill="var(--text-secondary)" fill-opacity="0.4" />
+                                    </marker>
+                                </defs>
+                                <rect width="100%" height="100%" fill="url(#grid)" />
+
+                                <!-- Zones Boundaries -->
+                                <!-- Zone: Internet -->
+                                <rect x="15" y="30" width="200" height="210" rx="10" class="zone-box zone-internet" />
+                                <text x="25" y="50" class="zone-title">INTERNET (PUBLIC)</text>
+
+                                <!-- Zone: AWS DMZ -->
+                                <rect x="235" y="30" width="530" height="145" rx="10" class="zone-box zone-aws-dmz" />
+                                <text x="245" y="50" class="zone-title">AWS DMZ ZONE (SINGAPORE)</text>
+
+                                <!-- Zone: External NAPAS -->
+                                <rect x="785" y="30" width="200" height="145" rx="10" class="zone-box zone-internet" />
+                                <text x="795" y="50" class="zone-title">EXTERNAL PARTNERS</text>
+
+                                <!-- Zone: Viettel IDC CDE -->
+                                <rect x="535" y="200" width="450" height="320" rx="10"
+                                    class="zone-box zone-viettel-cde" />
+                                <text x="545" y="220" class="zone-title">VIETTEL IDC - CDE ZONE (SECURE)</text>
+
+                                <!-- Zone: Viettel IDC Management -->
+                                <rect x="235" y="200" width="280" height="320" rx="10"
+                                    class="zone-box zone-viettel-mgmt" />
+                                <text x="245" y="220" class="zone-title">IDC MANAGEMENT ZONE</text>
+
+                                <!-- Connection lines -->
+                                <!-- User -> WAF -->
+                                <line x1="115" y1="100" x2="310" y2="100" class="net-link active-link"
+                                    marker-end="url(#arrow-blue)" />
+                                <!-- WAF -> Web -->
+                                <line x1="310" y1="100" x2="470" y2="100" class="net-link active-link"
+                                    marker-end="url(#arrow-blue)" />
+                                <!-- Web -> API Gateway -->
+                                <line x1="470" y1="100" x2="630" y2="100" class="net-link active-link"
+                                    marker-end="url(#arrow-blue)" />
+                                <!-- API Gateway -> Firewall CDE -->
+                                <path d="M 630 100 L 630 220 L 610 220 L 610 275" fill="none"
+                                    class="net-link active-link" marker-end="url(#arrow-blue)" />
+                                <!-- Firewall CDE -> Core -->
+                                <line x1="610" y1="275" x2="755" y2="275" class="net-link active-link"
+                                    marker-end="url(#arrow-blue)" />
+                                <!-- Core -> HSM -->
+                                <line x1="755" y1="275" x2="900" y2="360" class="net-link"
+                                    marker-end="url(#arrow-gray)" />
+                                <!-- Core -> DB -->
+                                <line x1="755" y1="275" x2="755" y2="415" class="net-link"
+                                    marker-end="url(#arrow-gray)" />
+                                <!-- Core -> Napas -->
+                                <path d="M 755 275 L 755 100 L 890 100" fill="none" class="net-link active-link"
+                                    marker-end="url(#arrow-blue)" />
+
+                                <!-- Admin -> VPN Tunnel (Firewall / Bastion) -->
+                                <path d="M 115 195 L 310 195 L 310 275" fill="none" class="net-link vpn-link"
+                                    stroke-dasharray="4,4" marker-end="url(#arrow-gray)" />
+                                <path d="M 115 195 L 610 195 L 610 275" fill="none" class="net-link vpn-link"
+                                    stroke-dasharray="4,4" marker-end="url(#arrow-gray)" />
+
+                                <!-- Bastion -> Internal Mgmt / Routing -->
+                                <line x1="310" y1="275" x2="450" y2="275" class="net-link mgmt-link"
+                                    stroke-dasharray="3,3" marker-end="url(#arrow-mgmt)" />
+                                <line x1="310" y1="275" x2="610" y2="275" class="net-link mgmt-link"
+                                    stroke-dasharray="3,3" marker-end="url(#arrow-mgmt)" />
+                                <path d="M 310 275 L 310 330 L 755 330 L 755 275" fill="none" class="net-link mgmt-link"
+                                    stroke-dasharray="3,3" marker-end="url(#arrow-mgmt)" />
+
+                                <!-- Database -> Backup (Secure storage) -->
+                                <path d="M 755 415 L 755 490 L 450 490 L 450 435" fill="none" class="net-link mgmt-link"
+                                    stroke-dasharray="3,3" marker-end="url(#arrow-mgmt)" />
+                                <!-- AD -> Core -->
+                                <path d="M 450 275 L 450 240 L 755 240 L 755 275" fill="none" class="net-link mgmt-link"
+                                    stroke-dasharray="2,2" marker-end="url(#arrow-mgmt)" />
+
+                                <!-- SIEM Audit Log Shipper Connections (Requirement 10) -->
+                                <path d="M 610 275 L 610 390 L 310 390 L 310 435" fill="none" class="net-link log-link"
+                                    stroke-dasharray="2,2" marker-end="url(#arrow-gray)" />
+                                <path d="M 450 275 L 450 370 L 310 370 L 310 435" fill="none" class="net-link log-link"
+                                    stroke-dasharray="2,2" marker-end="url(#arrow-gray)" />
+                                <line x1="310" y1="275" x2="310" y2="435" class="net-link log-link"
+                                    stroke-dasharray="2,2" marker-end="url(#arrow-gray)" />
+                                <line x1="450" y1="435" x2="310" y2="435" class="net-link log-link"
+                                    stroke-dasharray="2,2" marker-end="url(#arrow-gray)" />
+
+                                <!-- Interactive Legend Panel -->
+                                <g transform="translate(15, 260)">
+                                    <rect width="200" height="250" rx="8" fill="rgba(18, 24, 36, 0.85)"
+                                        stroke="var(--border-glass)" stroke-width="1" />
+                                    <text x="15" y="25" font-family="var(--font-heading)" font-size="12"
+                                        font-weight="700" fill="var(--text-primary)">CHÚ GIẢI SƠ ĐỒ</text>
+
+                                    <!-- Legend Items -->
+                                    <line x1="20" y1="50" x2="50" y2="50" class="net-link active-link"
+                                        stroke-width="2" />
+                                    <text x="60" y="54" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Luồng Giao Dịch Thẻ</text>
+
+                                    <path d="M 20 75 L 50 75" class="net-link vpn-link" stroke-width="1.5"
+                                        stroke-dasharray="4,4" />
+                                    <text x="60" y="79" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Kênh VPN Quản Trị</text>
+
+                                    <path d="M 20 100 L 50 100" class="net-link mgmt-link" stroke-width="1.5"
+                                        stroke-dasharray="3,3" />
+                                    <text x="60" y="104" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Kênh Vận Hành Nội Bộ</text>
+
+                                    <path d="M 20 125 L 50 125" class="net-link log-link" stroke-width="1.5"
+                                        stroke-dasharray="2,2" />
+                                    <text x="60" y="129" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Đường Truyền Logs SIEM</text>
+
+                                    <!-- Compliance Indicators -->
+                                    <circle cx="35" cy="160" r="7" fill="var(--bg-secondary)"
+                                        stroke="var(--color-success)" stroke-width="1.5" />
+                                    <text x="60" y="164" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Thiết Bị Đạt Chuẩn</text>
+
+                                    <circle cx="35" cy="185" r="7" fill="var(--bg-secondary)"
+                                        stroke="var(--color-danger)" stroke-width="1.5" />
+                                    <text x="60" y="189" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Thiết Bị Có Lỗ Hổng</text>
+
+                                    <circle cx="35" cy="210" r="7" fill="var(--bg-secondary)"
+                                        stroke="var(--color-warning)" stroke-width="1.5" />
+                                    <text x="60" y="214" font-family="var(--font-body)" font-size="10"
+                                        fill="var(--text-secondary)">Vùng Liên Kết (Connected)</text>
+                                </g>
+
+                                <!-- Nodes -->
+                                <!-- Node: user -->
+                                <g class="net-node" id="node-net-user" data-node="user">
+                                    <circle cx="115" cy="100" r="25" class="node-bg" />
+                                    <text x="115" y="106" class="node-icon">&#xf109;</text>
+                                    <text x="115" y="142" class="node-label">Khách hàng</text>
+                                </g>
+
+                                <!-- Node: admin -->
+                                <g class="net-node" id="node-net-admin" data-node="admin">
+                                    <circle cx="115" cy="195" r="25" class="node-bg" />
+                                    <text x="115" y="201" class="node-icon">&#xf505;</text>
+                                    <text x="115" y="237" class="node-label">Kỹ sư VPN</text>
+                                </g>
+
+                                <!-- Node: waf -->
+                                <g class="net-node" id="node-net-waf" data-node="waf">
+                                    <circle cx="310" cy="100" r="25" class="node-bg" />
+                                    <text x="310" y="106" class="node-icon">&#xf3ed;</text>
+                                    <text x="310" y="142" class="node-label">AWS WAF & ALB</text>
+                                </g>
+
+                                <!-- Node: web -->
+                                <g class="net-node" id="node-net-web" data-node="web">
+                                    <circle cx="470" cy="100" r="25" class="node-bg" />
+                                    <text x="470" y="106" class="node-icon">&#xf233;</text>
+                                    <text x="470" y="142" class="node-label">Web Server</text>
+                                </g>
+
+                                <!-- Node: apigw -->
+                                <g class="net-node" id="node-net-apigw" data-node="apigw">
+                                    <circle cx="630" cy="100" r="25" class="node-bg" />
+                                    <text x="630" y="106" class="node-icon">&#xf085;</text>
+                                    <text x="630" y="142" class="node-label">API Gateway</text>
+                                </g>
+
+                                <!-- Node: napas -->
+                                <g class="net-node" id="node-net-napas" data-node="napas">
+                                    <circle cx="890" cy="100" r="28" class="node-bg" />
+                                    <text x="890" y="106" class="node-icon">&#xf19c;</text>
+                                    <text x="890" y="144" class="node-label">Cổng NAPAS</text>
+                                </g>
+
+                                <!-- Node: cde-fw -->
+                                <g class="net-node" id="node-net-cde-fw" data-node="cde-fw">
+                                    <circle cx="610" cy="275" r="25" class="node-bg" />
+                                    <text x="610" y="281" class="node-icon">&#xf132;</text>
+                                    <text x="610" y="317" class="node-label">Palo Alto NGFW</text>
+                                </g>
+
+                                <!-- Node: core -->
+                                <g class="net-node" id="node-net-core" data-node="core">
+                                    <circle cx="755" cy="275" r="28" class="node-bg critical-node" />
+                                    <text x="755" y="281" class="node-icon">&#xf2db;</text>
+                                    <text x="755" y="319" class="node-label">Payment Core</text>
+                                </g>
+
+                                <!-- Node: hsm -->
+                                <g class="net-node" id="node-net-hsm" data-node="hsm">
+                                    <circle cx="900" cy="360" r="25" class="node-bg" />
+                                    <text x="900" y="366" class="node-icon small-icon">&#xf084;</text>
+                                    <text x="900" y="402" class="node-label">HSM Thales</text>
+                                </g>
+
+                                <!-- Node: db -->
+                                <g class="net-node" id="node-net-db" data-node="db">
+                                    <circle cx="755" cy="415" r="28" class="node-bg critical-node" />
+                                    <text x="755" y="421" class="node-icon">&#xf1c0;</text>
+                                    <text x="755" y="459" class="node-label">PostgreSQL DB</text>
+                                </g>
+
+                                <!-- Node: bastion -->
+                                <g class="net-node" id="node-net-bastion" data-node="bastion">
+                                    <circle cx="310" cy="275" r="25" class="node-bg" />
+                                    <text x="310" y="281" class="node-icon">&#xf52b;</text>
+                                    <text x="310" y="317" class="node-label">Bastion Host</text>
+                                </g>
+
+                                <!-- Node: ad -->
+                                <g class="net-node" id="node-net-ad" data-node="ad">
+                                    <circle cx="450" cy="275" r="25" class="node-bg" />
+                                    <text x="450" y="281" class="node-icon">&#xf509;</text>
+                                    <text x="450" y="317" class="node-label">Active Directory</text>
+                                </g>
+
+                                <!-- Node: siem -->
+                                <g class="net-node" id="node-net-siem" data-node="siem">
+                                    <circle cx="310" cy="435" r="25" class="node-bg" />
+                                    <text x="310" y="441" class="node-icon">&#xe522;</text>
+                                    <text x="310" y="477" class="node-label">Wazuh SIEM</text>
+                                </g>
+
+                                <!-- Node: backup -->
+                                <g class="net-node" id="node-net-backup" data-node="backup">
+                                    <circle cx="450" cy="435" r="25" class="node-bg" />
+                                    <text x="450" y="441" class="node-icon">&#xf0a0;</text>
+                                    <text x="450" y="477" class="node-label">Backup Server</text>
+                                </g>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Right: Info Panel of Selected Node -->
+                    <div class="network-info-card">
+                        <div class="section-card">
+                            <h3 style="display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-circle-info"
+                                    style="color: var(--color-primary);"></i> Chi Tiết Thành Phần Mạng</h3>
+                            <p class="text-muted mb-15">Thông tin tài sản và trạng thái bảo mật của thiết bị đang chọn
+                            </p>
+
+                            <div class="selected-node-details" id="node-details-panel">
+                                <div class="empty-node-selection">
+                                    <i class="fa-solid fa-mouse-pointer animate-bounce"></i>
+                                    <p>Vui lòng click vào một thiết bị trên sơ đồ để xem thông tin an ninh chi tiết.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SECURITY SCANNER & ATTACK SIMULATOR -->
+            <section class="tab-content" id="tab-scanner">
+                <div class="scanner-layout">
+                    <!-- Left: Vulnerability Scanner -->
+                    <div class="section-card scanner-panel">
+                        <div class="scanner-panel-header">
+                            <div>
+                                <h3 style="display: flex; align-items: center; gap: 8px;"><i
+                                        class="fa-solid fa-magnifying-glass-shield"
+                                        style="color: var(--color-primary);"></i> Trình Quét Lỗ Hổng Bảo Mật Giả Lập
+                                </h3>
+                                <p class="text-muted">Dò tìm các lỗ hổng hệ thống và cấu hình mạng (Nessus/Qualys
+                                    Simulator)</p>
+                            </div>
+                            <button class="btn btn-primary" id="btn-start-scan">
+                                <i class="fa-solid fa-play"></i> Bắt đầu Quét Hệ Thống
+                            </button>
+                        </div>
+
+                        <!-- Scan Status / Progress Bar -->
+                        <div class="scan-progress-area mt-15" id="scan-progress-area" style="display: none;">
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" id="scan-progress-bar">0%</div>
+                            </div>
+                            <div class="scan-status-text text-muted mt-5" id="scan-status-text">Đang khởi tạo máy
+                                quét...</div>
+                        </div>
+
+                        <!-- Scan Report Output -->
+                        <div class="scan-report-container mt-20" id="scan-report-container">
+                            <div class="scan-report-empty text-center text-muted">
+                                <i class="fa-solid fa-magnifying-glass-shield animate-pulse"
+                                    style="font-size: 36px; display: block; margin-bottom: 15px; color: var(--text-secondary);"></i>
+                                <p>Môi trường DieuPay chưa được quét an ninh. Nhấn nút "Bắt đầu Quét Hệ Thống" để dò tìm
+                                    lỗ hổng.</p>
+                            </div>
+                            <!-- Discovered CVEs will be rendered here dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: Attack Simulator -->
+                    <div class="section-card attack-panel">
+                        <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;"><i
+                                class="fa-solid fa-user-secret" style="color: var(--color-danger);"></i> Mô Phỏng Kịch
+                            Bản Tấn Công</h3>
+                        <p class="text-muted mb-15">Thử nghiệm các cuộc tấn công mạng thực tế để kiểm tra tính hiệu quả
+                            của các cơ chế phòng thủ DieuPay.</p>
+
+                        <div class="attack-scenarios-grid">
+                            <div class="attack-card" id="attack-sql">
+                                <div class="attack-icon"><i class="fa-solid fa-database"></i></div>
+                                <div class="attack-info">
+                                    <strong>SQL Injection (SQLi)</strong>
+                                    <span>Khai thác truy vấn DB thông qua cổng thanh toán API công cộng.</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="runAttack('sql')">Tấn Công</button>
+                            </div>
+
+                            <div class="attack-card" id="attack-log4j">
+                                <div class="attack-icon"><i class="fa-solid fa-terminal"></i></div>
+                                <div class="attack-info">
+                                    <strong>Khai thác Log4Shell (RCE)</strong>
+                                    <span>Gửi payload JNDI qua logs để thực thi mã từ xa trên Core Server.</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="runAttack('log4j')">Tấn Công</button>
+                            </div>
+
+                            <div class="attack-card" id="attack-mitm">
+                                <div class="attack-icon"><i class="fa-solid fa-network-wired"></i></div>
+                                <div class="attack-info">
+                                    <strong>Bắt gói tin truyền dẫn (MITM)</strong>
+                                    <span>Nghe lén thông tin thẻ trên các kênh truyền public thiếu mã hóa.</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="runAttack('mitm')">Tấn Công</button>
+                            </div>
+
+                            <div class="attack-card" id="attack-brute">
+                                <div class="attack-icon"><i class="fa-solid fa-user-shield"></i></div>
+                                <div class="attack-info">
+                                    <strong>Dò mật khẩu SSH VPN (Brute-Force)</strong>
+                                    <span>Dò mật khẩu quản trị vào Bastion Host do thiếu xác thực MFA.</span>
+                                </div>
+                                <button class="btn btn-danger btn-sm" onclick="runAttack('brute')">Tấn Công</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: SELF-ASSESSMENT QUESTIONNAIRE (SAQ) -->
+            <section class="tab-content" id="tab-saq">
+                <div class="saq-layout">
+                    <!-- SAQ Selector Wizard / Decision Tool -->
+                    <div class="section-card">
+                        <div class="card-header card-header-flex">
+                            <div>
+                                <h3 style="display: flex; align-items: center; gap: 8px;"><i
+                                        class="fa-solid fa-wand-magic-sparkles"
+                                        style="color: var(--color-primary);"></i> Trợ Lý Lựa Chọn Loại Báo Cáo SAQ</h3>
+                                <p class="text-muted">Trả lời vài câu hỏi nhanh để tìm ra loại báo cáo SAQ phù hợp nhất
+                                    với mô hình của DieuPay</p>
+                            </div>
+                            <!-- Dropdown selection fallback -->
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <label for="saq-flow-select"
+                                    style="font-size: 11px; color: var(--text-secondary); white-space: nowrap;">Chọn
+                                    nhanh loại SAQ:</label>
+                                <select id="saq-flow-select" class="form-control"
+                                    style="background: rgba(0, 0, 0, 0.4); border: 1px solid var(--border-glass); color: var(--text-primary); padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;">
+                                    <option value="saq-a">SAQ A - Thuê ngoài hoàn toàn</option>
+                                    <option value="saq-a-ep">SAQ A-EP - Thương mại điện tử API</option>
+                                    <option value="saq-b">SAQ B - Thiết bị cà thẻ cơ học</option>
+                                    <option value="saq-b-ip">SAQ B-IP - POS kết nối IP</option>
+                                    <option value="saq-c-vt">SAQ C-VT - Virtual Terminal</option>
+                                    <option value="saq-c">SAQ C - Ứng dụng thanh toán internet</option>
+                                    <option value="saq-p2pe">SAQ P2PE - Thiết bị P2PE đạt chuẩn</option>
+                                    <option value="saq-d-merchant" selected>SAQ D Merchant - Doanh nghiệp (DieuPay mặc
+                                        định)</option>
+                                    <option value="saq-d-service">SAQ D Service Provider - Nhà cung cấp dịch vụ</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Wizard Container -->
+                        <div class="saq-wizard-card mt-15" id="saq-wizard-container"
+                            style="background: rgba(255, 255, 255, 0.01); border: 1px solid var(--border-glass); padding: 15px 20px; border-radius: 8px; margin-bottom: 15px;">
+                            <div id="saq-wizard-intro">
+                                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                                    <i class="fa-solid fa-graduation-cap"
+                                        style="font-size: 24px; color: var(--color-primary);"></i>
+                                    <strong style="font-size: 13px;">Bạn chưa biết chọn loại SAQ nào?</strong>
+                                </div>
+                                <p class="text-muted" style="font-size: 11.5px; line-height: 1.5; margin-bottom: 15px;">
+                                    Theo quy định của Hội đồng Tiêu chuẩn Bảo mật PCI (PCI SSC), các doanh nghiệp tự
+                                    đánh giá tuân thủ (Self-Assessment) phải lựa chọn chính xác 1 trong 9 loại báo cáo
+                                    SAQ dựa trên mô hình hoạt động. Công cụ này sẽ dẫn dắt bạn từng bước để đưa ra
+                                    khuyến nghị chuẩn xác nhất.
+                                </p>
+                                <button class="btn btn-primary btn-sm" id="btn-start-saq-wizard">
+                                    <i class="fa-solid fa-play"></i> Bắt đầu Khảo sát Lựa chọn SAQ
+                                </button>
+                            </div>
+                            <div id="saq-wizard-questions" style="display: none;">
+                                <div class="wizard-progress-bar-container"
+                                    style="width: 100%; height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; margin-bottom: 15px; overflow: hidden;">
+                                    <div id="wizard-progress-fill"
+                                        style="width: 0%; height: 100%; background: var(--color-primary); transition: width 0.3s;">
+                                    </div>
+                                </div>
+                                <h4 id="wizard-question-text"
+                                    style="font-family: var(--font-heading); font-size: 13px; font-weight: 600; margin-bottom: 12px;">
+                                    Câu hỏi...</h4>
+                                <div id="wizard-options-container"
+                                    style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px;">
+                                    <!-- Options dynamic -->
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <button class="btn btn-secondary btn-sm" id="btn-prev-wizard"
+                                        style="display: none;"><i class="fa-solid fa-chevron-left"></i> Quay
+                                        lại</button>
+                                    <span id="wizard-step-info" class="text-muted" style="font-size: 11px;">Bước 1 /
+                                        4</span>
+                                    <button class="btn btn-secondary btn-sm" id="btn-reset-wizard"
+                                        style="margin-left: auto;"><i class="fa-solid fa-arrow-rotate-left"></i> Làm
+                                        lại</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Result & QSA Advice Panel -->
+                        <div id="saq-result-panel" class="saq-result-panel mt-15"
+                            style="display: none; background: rgba(59, 130, 246, 0.04); border: 1px solid rgba(59, 130, 246, 0.2); padding: 15px 20px; border-radius: 8px;">
+                            <!-- Will be updated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- SAQ-D Self-Assessment Questionnaire -->
+                    <div class="section-card mt-10">
+                        <div class="card-header card-header-flex">
+                            <div>
+                                <h3 style="display: flex; align-items: center; gap: 8px;"><i
+                                        class="fa-solid fa-clipboard-question" style="color: var(--color-primary);"></i>
+                                    Khảo Sát Chi Tiết Tự Đánh Giá (SAQ D)</h3>
+                                <p class="text-muted">Bảng tự đánh giá DieuPay theo biểu mẫu SAQ D (Bản đầy đủ dành cho
+                                    Merchant)</p>
+                            </div>
+                            <div class="saq-progress-box">
+                                <span class="saq-progress-label">Tiến trình SAQ:</span>
+                                <div class="saq-progress-bar-container">
+                                    <div class="saq-progress-bar-fill" id="saq-progress-bar" style="width: 31%;"></div>
+                                </div>
+                                <span class="saq-progress-score" id="saq-progress-score">4 / 12 Đạt</span>
+                            </div>
+                        </div>
+
+                        <!-- Attestation of Compliance (AoC) Certificate container -->
+                        <div id="saq-aoc-container" class="mt-15"></div>
+
+                        <div class="saq-instructions mt-15">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span>
+                                <strong>Hướng dẫn:</strong> Bảng khảo sát này được đồng bộ trực tiếp với Bảng điều khiển
+                                tuân thủ. Bạn có thể thay đổi trạng thái kiểm soát trực tiếp tại đây bằng cách click vào
+                                "Có" (Đạt) hoặc "Không" (Thiếu sót) để kiểm chứng sự thay đổi điểm tuân thủ.
+                            </span>
+                        </div>
+
+                        <div class="saq-questions-list mt-20" id="saq-questions-container">
+                            <!-- Dynamic SAQ cards will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: SECURITY POLICIES LIBRARY -->
+            <section class="tab-content" id="tab-policies">
+                <div class="policies-layout">
+                    <!-- Left: Document List Sidebar -->
+                    <aside class="policy-sidebar">
+                        <div class="section-card" style="height: 100%; display: flex; flex-direction: column;">
+                            <h3 style="display: flex; align-items: center; gap: 8px; margin-bottom: 5px;"><i
+                                    class="fa-solid fa-folder-open" style="color: var(--color-primary);"></i> Thư Viện
+                                Tài Liệu</h3>
+                            <p class="text-muted mb-15">Chọn chính sách bảo mật để xem và sao chép phục vụ đánh giá Yêu
+                                cầu 12</p>
+                            <div class="policy-list-menu" id="policy-menu-container">
+                                <!-- Dynamic policy buttons -->
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Right: Document Viewer -->
+                    <main class="policy-viewer-panel">
+                        <div class="section-card document-card">
+                            <div class="document-header">
+                                <div class="doc-title-area">
+                                    <div class="doc-icon"><i class="fa-solid fa-file-invoice"></i></div>
+                                    <div>
+                                        <h3 id="doc-title">Tên tài liệu chính sách</h3>
+                                        <span id="doc-metadata">Mã số: DP-SEC-POL-01 | Phiên bản: 1.0</span>
+                                    </div>
+                                </div>
+                                <div class="doc-actions">
+                                    <button class="btn btn-primary btn-sm" id="btn-copy-policy">
+                                        <i class="fa-solid fa-copy"></i> Sao chép tài liệu
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="document-body" id="doc-body-content">
+                                <!-- Dynamic policy content -->
+                            </div>
+                        </div>
+                    </main>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Breach Modal Overlay (Attack Success) -->
+    <div class="breach-modal-overlay" id="breach-modal">
+        <div class="breach-modal-content">
+            <div class="breach-modal-header">
+                <i class="fa-solid fa-radiation animate-spin"></i>
+                <h2>HỆ THỐNG BỊ XÂM NHẬP THÀNH CÔNG!</h2>
+                <i class="fa-solid fa-radiation animate-spin"></i>
+            </div>
+            <div class="breach-modal-body">
+                <p class="breach-alert-title">PHÁT HIỆN HÀNH VI ĐÁNH CẮP DỮ LIỆU THẺ CHỦ (DATA BREACH)</p>
+                <div class="breach-details">
+                    <div class="detail-row">
+                        <strong class="text-secondary">Kịch bản tấn công:</strong>
+                        <span id="breach-modal-attack-type">SQL Injection</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="text-secondary">Thiệt hại giả lập:</strong>
+                        <span class="text-danger font-bold" id="breach-modal-damage">Rò rỉ 10,000 số thẻ tín dụng rõ
+                            (Plaintext PAN & CVV)!</span>
+                    </div>
+                    <div class="detail-row">
+                        <strong class="text-secondary">Nguyên nhân lỗ hổng:</strong>
+                        <span id="breach-modal-cause">Không tuân thủ Yêu cầu 3 & Yêu cầu 7 của PCI DSS.</span>
+                    </div>
+                </div>
+                <div class="breach-advice mt-15">
+                    <strong>Đề xuất khắc phục ngay lập tức:</strong>
+                    <p id="breach-modal-fix">Hãy quay lại Bảng điều khiển tuân thủ để thực hiện các bản vá lỗi "Khắc
+                        phục" và nâng cấp an ninh hệ thống!</p>
+                </div>
+            </div>
+            <button class="btn btn-danger mt-20 btn-block" onclick="closeBreachModal()">Đóng Cảnh Báo & Vá Lỗi</button>
+        </div>
+    </div>
+
+    <!-- Secure Defense Toast/Notification (Attack Blocked) -->
+    <div class="defense-toast" id="defense-toast">
+        <div class="toast-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="toast-content">
+            <strong>TẤN CÔNG BỊ CHẶN ĐỨNG THÀNH CÔNG!</strong>
+            <span id="defense-toast-text">AWS WAF đã phát hiện payload SQLi và chặn địa chỉ IP nguồn (HTTP 403).</span>
+        </div>
+        <button class="toast-close" onclick="closeDefenseToast()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <!-- Script Sources -->
+    <script src="app.js"></script>
+</body>
+
+</html>
