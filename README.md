@@ -1,11 +1,11 @@
-# DieuPay - PCI DSS Gap Assessment & Payment Simulation
+# NTDPay - PCI DSS Gap Assessment & Payment Simulation
 
 ![PCI DSS Compliant Intent](https://img.shields.io/badge/PCI--DSS-v4.0%20Compliant-green.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 ![Language](https://img.shields.io/badge/languages-HTML%20%7C%20CSS%20%7C%20JS-blue.svg)
 
 ## 📝 Giới thiệu Dự án
-**DieuPay** (hoặc NTDPay) là một dự án nghiên cứu và mô phỏng hệ thống thanh toán trực tuyến bảo mật, kết hợp với tài liệu **Đánh giá khoảng cách bảo mật (Gap Assessment)** theo tiêu chuẩn **PCI DSS (Payment Card Industry Data Security Standard)**. 
+** NTDPay là một dự án nghiên cứu và mô phỏng hệ thống thanh toán trực tuyến bảo mật, kết hợp với tài liệu **Đánh giá khoảng cách bảo mật (Gap Assessment)** theo tiêu chuẩn **PCI DSS (Payment Card Industry Data Security Standard)**. 
 
 Dự án này được xây dựng nhằm mục đích giáo dục, phân tích kiến trúc an toàn thông tin và đưa ra các giải pháp kỹ thuật tối ưu nhằm bảo vệ Dữ liệu chủ thẻ (CHD) và Dữ liệu xác thực nhạy cảm (SAD) tuân thủ nghiêm ngặt theo các yêu cầu khắt khe của hội đồng PCI.
 
